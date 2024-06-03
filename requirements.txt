@@ -1,0 +1,25 @@
+neovim
+packer 
+packer plugins :
+ • LuaSnip
+ • bufferline.nvim
+ • cmp-buffer
+ • cmp-cmdline
+ • cmp-nvim-lsp
+ • cmp-path
+ • cmp_luasnip
+ • friendly-snippets
+ • fzf
+ • fzf.vim
+ • gruvbox
+ • lualine.nvim
+ • mason-lspconfig.nvim
+ • mason.nvim
+ • null-ls.nvim
+ • nvim-cmp
+ • nvim-lspconfig
+ • nvim-tree.lua
+ • nvim-treesitter
+ • nvim-web-devicons
+ • packer.nvim
+ • toggleterm.nvim
