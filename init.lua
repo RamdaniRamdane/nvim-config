@@ -5,6 +5,7 @@ vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.cursorline = true
 vim.opt.cursorcolumn = false
+vim.opt.relativenumber = true
 
 --plugins
 vim.cmd([[packadd packer.nvim]]) --using packer as package manager
