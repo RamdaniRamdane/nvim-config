@@ -5,7 +5,6 @@ vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.cursorline = true
 vim.opt.cursorcolumn = false
-vim.opt.relativenumber = true
 
 --plugins
 vim.cmd([[packadd packer.nvim]]) --using packer as package manager
@@ -91,7 +90,20 @@ require("packer").startup(function(use)
   use("nvim-tree/nvim-tree.lua")
   -- vs-code like icons
   use("nvim-tree/nvim-web-devicons")
-  require("nvim-tree").setup({})
+  require("nvim-tree").setup({
+  sort = {
+    sorter = "case_sensitive",
+  },
+  view = {
+    width = 30,
+  },
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+  })
   -- end nvim tree
 
   -- vim-cmp
@@ -215,7 +227,7 @@ require("packer").startup(function(use)
   local lspconfig = require("lspconfig")
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-  local servers = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls" }
+  local servers = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls"  }
 
   for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup({
