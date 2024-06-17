@@ -90,20 +90,7 @@ require("packer").startup(function(use)
   use("nvim-tree/nvim-tree.lua")
   -- vs-code like icons
   use("nvim-tree/nvim-web-devicons")
-  require("nvim-tree").setup({
-  sort = {
-    sorter = "case_sensitive",
-  },
-  view = {
-    width = 30,
-  },
-  renderer = {
-    group_empty = true,
-  },
-  filters = {
-    dotfiles = true,
-  },
-  })
+  require("nvim-tree").setup({})
   -- end nvim tree
 
   -- vim-cmp
@@ -227,7 +214,7 @@ require("packer").startup(function(use)
   local lspconfig = require("lspconfig")
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-  local servers = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls"  }
+  local servers = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls" }
 
   for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup({
@@ -242,7 +229,7 @@ require("packer").startup(function(use)
     tag = "*",
     config = function()
       require("toggleterm").setup({
-        shell = '/bin/bash',
+        shell = "/bin/bash",
         size = 20,
         open_mapping = [[<c-\>]],
         hide_numbers = true,
@@ -270,8 +257,83 @@ require("packer").startup(function(use)
   -- bufferline
   use({ "akinsho/bufferline.nvim", tag = "*", requires = "nvim-tree/nvim-web-devicons" })
   vim.opt.termguicolors = true
-  require("bufferline").setup({})
+  require("bufferline").setup({
+    options = {
+      numbers = "ordinal",
+      close_command = "bdelete! %d",
+      right_mouse_command = "bdelete! %d",
+      left_mouse_command = "buffer %d",
+      middle_mouse_command = nil,
+      indicator_icon = "▎",
+      buffer_close_icon = "",
+      modified_icon = "●",
+      close_icon = "",
+      left_trunc_marker = "",
+      right_trunc_marker = "",
+      max_name_length = 18,
+      max_prefix_length = 15,
+      tab_size = 18,
+      diagnostics = false,
+      custom_filter = function(buf_number)
+        -- Func to filter out unwanted buffer types
+        return true
+      end,
+      offsets = {
+        {
+          filetype = "NvimTree",
+          text = "File Explorer",
+          text_align = "center",
+          padding = 1,
+        },
+      },
+      show_buffer_icons = true,
+      show_buffer_close_icons = true,
+      show_close_icon = true,
+      show_tab_indicators = true,
+      persist_buffer_sort = true,
+      separator_style = "slant",
+      enforce_regular_tabs = true,
+      always_show_bufferline = true,
+      sort_by = "id",
+    },
+  })
   --end bufferline
+  --autopairs ()[] ..
+  use("windwp/nvim-autopairs")
+  --setup autopairs
+  local status_ok, npairs = pcall(require, "nvim-autopairs")
+  if not status_ok then
+    return
+  end
+
+  npairs.setup({
+    check_ts = true,
+    ts_config = {
+      lua = { "string", "source" },
+      javascript = { "string", "template_string" },
+      java = false,
+    },
+    disable_filetype = { "TelescopePrompt", "spectre_panel" },
+    fast_wrap = {
+      map = "<M-e>",
+      chars = { "{", "[", "(", '"', "'" },
+      pattern = string.gsub([[ [%'%"%)%>%]%)%}%,] ]], "%s+", ""),
+      offset = 0, -- Offset from pattern match
+      end_key = "$",
+      keys = "qwertyuiopzxcvbnmasdfghjkl",
+      check_comma = true,
+      highlight = "PmenuSel",
+      highlight_grey = "LineNr",
+    },
+  })
+
+  local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+  local cmp_status_ok, cmp = pcall(require, "cmp")
+  if not cmp_status_ok then
+    return
+  end
+  cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
+  --end autopairs
 end)
 
 -- Map global leader from \ to space
