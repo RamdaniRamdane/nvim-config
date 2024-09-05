@@ -1,4 +1,3 @@
--- author : Ramdani Ramdane < 
 vim.opt.number = true
 vim.opt.list = true
 vim.opt.listchars:append("tab:> ")
@@ -11,19 +10,8 @@ vim.opt.cursorcolumn = false
 vim.cmd([[packadd packer.nvim]]) --using packer as package manager
 require("packer").startup(function(use)
   use("wbthomason/packer.nvim")
-  --gruvbox theme
-  use("morhetz/gruvbox")
-  vim.cmd([[
-    let g:gruvbox_contrast_dark = 'hard'
-    colorscheme gruvbox
-    " Personnaliser les couleurs pour le background
-    hi Normal guibg=#000000
-    hi LineNr guibg=#000000
-    hi CursorLine guibg=#121212
-    hi CursorLineNr guibg=#121212
-    hi SignColumn guibg=#000000
-    hi StatusLine guibg=#1c1c1c
-  ]])
+  use("Shatur/neovim-ayu")
+  require('ayu').colorscheme()
   -- end gruvbox theme
 
   -- use treesitter for lang highlight
@@ -42,7 +30,7 @@ require("packer").startup(function(use)
   require("lualine").setup({
     options = {
       icons_enabled = true,
-      theme = "auto",
+      theme = "ayu",
       component_separators = { left = "", right = "" },
       section_separators = { left = "", right = "" },
       disabled_filetypes = {
@@ -110,6 +98,7 @@ require("packer").startup(function(use)
   use("williamboman/mason.nvim") -- simple to use language server installer
   use("williamboman/mason-lspconfig.nvim") -- simple to use language server installer
   use("jose-elias-alvarez/null-ls.nvim") -- LSP diagnostics and code actions
+  use("jose-elias-alvarez/typescript.nvim")
   require("mason").setup()
   require("mason-lspconfig").setup({
     ensure_installed = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls" },
@@ -151,10 +140,10 @@ require("packer").startup(function(use)
     snippet = {
       -- REQUIRED - you must specify a snippet engine
       expand = function(args)
-        --vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-        require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
-        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        --vim.fn["vsnip#anonymous"](args.body) -- For vsnip users.
+        require("luasnip").lsp_expand(args.body) -- For luasnip users.
+        -- require('snippy').expand_snippet(args.body) -- For snippy users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For ultisnips users.
         -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
       end,
     },
@@ -167,12 +156,13 @@ require("packer").startup(function(use)
       ["<C-f>"] = cmp.mapping.scroll_docs(4),
       ["<C-Space>"] = cmp.mapping.complete(),
       ["<C-e>"] = cmp.mapping.abort(),
-      ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set select to false to only confirm explicitly selected items.
     }),
     sources = cmp.config.sources({
       { name = "nvim_lsp" },
       -- { name = 'vsnip' }, -- For vsnip users.
-      { name = "luasnip" }, -- For luasnip users.
+      { name = "luasnip" }, -- For luasnip users.,
+      { name = 'emmet_ls' }
       -- { name = 'ultisnips' }, -- For ultisnips users.
       -- { name = 'snippy' }, -- For snippy users.
     }, {
@@ -192,7 +182,7 @@ require("packer").startup(function(use)
  require("cmp_git").setup() ]]
   --
 
-  -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+  -- Use buffer source for / and ? (if you enabled native_menu, this won't work anymore).
   cmp.setup.cmdline({ "/", "?" }, {
     mapping = cmp.mapping.preset.cmdline(),
     sources = {
@@ -200,7 +190,7 @@ require("packer").startup(function(use)
     },
   })
 
-  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+  -- Use cmdline & path source for ':' (if you enabled native_menu, this won't work anymore).
   cmp.setup.cmdline(":", {
     mapping = cmp.mapping.preset.cmdline(),
     sources = cmp.config.sources({
@@ -215,7 +205,7 @@ require("packer").startup(function(use)
   local lspconfig = require("lspconfig")
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-  local servers = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls" }
+  local servers = { "pyright", "tsserver", "html", "cssls", "eslint", "jsonls", "bashls", "dockerls", "yamlls"  }
 
   for _, lsp in ipairs(servers) do
     lspconfig[lsp].setup({
@@ -335,7 +325,32 @@ require("packer").startup(function(use)
   end
   cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
   --end autopairs
+use({"prettier/vim-prettier",
+  run = "yarn install --frozen-lockfile --production",
+  ft = { "javascript", "typescript", "html", "css", "json", "markdown" }, -- Extensions à formater
+})
+
+local nvim_lsp = require('lspconfig')
+nvim_lsp.tsserver.setup({
+  on_attach = function(client, bufnr)
+    -- Keybindings or additional settings for the LSP can go here
+    local opts = { noremap=true, silent=true }
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>rn', '<Cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  end,
+  capabilities = vim.lsp.protocol.make_client_capabilities(),
+  filetypes = { "html" , "css" , "javascript", "javascriptreact", "typescript", "typescriptreact" },  -- Enable for React and TypeScript
+  root_dir = function() return vim.loop.cwd() end  -- Set the root directory to the current working directory
+})
+require'lspconfig'.emmet_ls.setup({
+    filetypes = { 'html', 'css', 'typescriptreact', 'javascriptreact', 'javascript', 'typescript', 'scss', 'sass', 'less' },
+})
 end)
+
+
+
+
 
 -- Map global leader from \ to space
 vim.g.mapleader = " "
@@ -344,3 +359,5 @@ vim.keymap.set("n", "<leader>a", ":NvimTreeFindFileToggle<cr>", { silent = true 
 vim.keymap.set("n", "<leader>z", ":NvimTreeFocus<cr>", { silent = true })
 vim.keymap.set("n", "<leader><right>", ":BufferLineCycleNext<cr>", { silent = true })
 vim.keymap.set("n", "<leader><left>", ":BufferLineCyclePrev<cr>", { silent = true })
+vim.keymap.set("n", "<leader>t", ":ToggleTerm<cr>", { silent = true })
+
