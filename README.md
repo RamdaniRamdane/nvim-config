@@ -1,4 +1,4 @@
 # nvim-config 
 menimal config for neovim
-![Screenshot](screenshots/screenshot_2024-06-17_15-06-59.png)
+![Screenshot](screenshots/screenshotGuide_2024-09-07_15-01-47.png)
 
